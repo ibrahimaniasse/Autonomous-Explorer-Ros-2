@@ -1,0 +1,6 @@
+obstacle_detector:
+  ros__parameters:
+    danger_zone: 0.5
+    w_lidar: 0.6
+    w_cam: 0.4
+    confidence_threshold: 0.5

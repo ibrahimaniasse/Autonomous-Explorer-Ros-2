@@ -1,0 +1,65 @@
+frontier_explorer:
+  ros__parameters:
+    # --- Detection --------------------------------------------------------
+    # Minimum number of connected frontier pixels to form a valid cluster.
+    # Smaller clusters are discarded as sensor noise.
+    min_cluster_size_px: 10
+
+    # Maximum rate (Hz) at which the map callback triggers a replan.
+    # Keeps CPU usage reasonable and avoids goal-thrashing on rapid map
+    # updates from SLAM Toolbox.
+    map_update_rate_hz: 1.0
+
+    # Lower hysteresis threshold for Canny edge detector.
+    # Adapted to the 3-level mapping (0/127/255) — any value < 127 works.
+    canny_low_threshold: 100
+
+    # Upper hysteresis threshold for Canny edge detector.
+    # Hysteresis is not critical with discrete 3-level images.
+    canny_high_threshold: 200
+
+    # --- Selection (utility = α·info_gain − β·distance) ------------------
+    # α — preference for large unexplored regions.  Increasing this makes
+    # the robot favour big frontiers even if they are far away.
+    info_gain_weight: 1.0
+
+    # β — penalty for far-away frontiers.  Increasing this makes the robot
+    # favour nearby frontiers, reducing travel time per goal.
+    distance_weight: 0.5
+
+    # Minimum distance (metres) between the robot and a candidate frontier.
+    # Frontiers closer than this are filtered out to avoid selecting goals
+    # already inside Nav2's xy_goal_tolerance (0.25 m).  Set above the
+    # tolerance with margin.
+    min_frontier_distance_m: 0.3
+
+    # --- Recovery ---------------------------------------------------------
+    # If the robot's position changes by less than this (metres) within
+    # stuck_timeout_s seconds, it is considered stuck and recovery
+    # behaviours are triggered (BackUp + Spin).
+    stuck_threshold_m: 0.1
+
+    # Window (seconds) over which position change is evaluated to detect
+    # a stuck condition.
+    stuck_timeout_s: 30.0
+
+    # Number of consecutive ABORTED results for the *same* frontier
+    # centroid before it is blacklisted.
+    max_retries_per_frontier: 2
+
+    # Angular velocity (rad/s) for the open-loop recovery spin.
+    # The robot rotates ~90° at this speed via direct cmd_vel when no
+    # valid frontier is found, letting the LiDAR scan new sectors.
+    recovery_spin_speed_rad_s: 1.0
+
+    # --- Termination ------------------------------------------------------
+    # Fraction of reachable cells that must be "known" (free or occupied)
+    # before exploration is considered complete.  0.95 = 95 %.
+    completion_threshold: 0.95
+
+    # Number of consecutive planning cycles that return zero valid
+    # frontiers before the explorer attempts recovery or declares
+    # the map complete.  At 1 Hz replan rate, 10 gives the SLAM map
+    # time to grow before triggering recovery — especially at startup
+    # when the initial scan radius is small.
+    empty_iterations_before_stop: 10
