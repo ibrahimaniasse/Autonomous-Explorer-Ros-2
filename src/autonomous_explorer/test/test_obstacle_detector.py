@@ -1,9 +1,7 @@
 import pytest
 import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import LaserScan, Image
+from sensor_msgs.msg import LaserScan
 from autonomous_explorer.obstacle_detector import ObstacleDetector
-import numpy as np
 
 
 @pytest.fixture

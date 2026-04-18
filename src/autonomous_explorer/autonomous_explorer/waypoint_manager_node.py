@@ -13,7 +13,6 @@ autonomous exploration showcase lives in ``frontier_explorer_node.py``.
 from __future__ import annotations
 
 import json
-from typing import Optional
 
 import rclpy
 from rclpy.action import ActionClient

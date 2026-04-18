@@ -359,7 +359,7 @@ class FrontierExplorer(Node):
         if not goal_handle.accepted:
             self._retry_count += 1
             self.get_logger().warn(
-                f"Navigation goal was rejected (retry {self._retry_count}/{self._max_retries})."
+                f"Navigation goal was rejected (retry {self._retry_count}/{self._max_retries})."  # noqa: E501
             )
             self._navigating = False
             self._last_goal_centroid_px = None  # Allow immediate retry

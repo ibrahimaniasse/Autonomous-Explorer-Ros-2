@@ -33,8 +33,9 @@ jobs:
 
       - name: Run Mypy (type hinting)
         run: |
-          # ignore missing imports for external libraries
-          mypy --ignore-missing-imports src/
+          # Only check pure Python nodes, not launch files (which use untyped ROS C++ modules)
+          mypy --ignore-missing-imports \
+            src/autonomous_explorer/autonomous_explorer/
 
       - name: Build Workspace
         run: |
@@ -59,4 +60,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker compose build
+        run: docker compose -f docker/docker-compose.yml build

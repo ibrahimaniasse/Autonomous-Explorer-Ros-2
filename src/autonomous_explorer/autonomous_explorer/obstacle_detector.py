@@ -8,11 +8,11 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan, Image
 from visualization_msgs.msg import Marker, MarkerArray
-from geometry_msgs.msg import Point
 import cv2
 from cv_bridge import CvBridge
 import numpy as np
 import math
+from typing import Optional, List, Tuple
 
 
 class ObstacleDetector(Node):
@@ -54,7 +54,7 @@ class ObstacleDetector(Node):
 
         # State vars
         self.latest_cam_confidence = 0.0
-        self.latest_scan: LaserScan = None
+        self.latest_scan: Optional[LaserScan] = None
 
         # Timer for fusing and publishing (10 Hz)
         self.timer = self.create_timer(0.1, self.fusion_callback)
@@ -89,7 +89,7 @@ class ObstacleDetector(Node):
         # Calculate confidence based on the density of edges
         edge_density = np.sum(edges > 0) / (edges.shape[0] * edges.shape[1])
 
-        # Normalize edge density conceptually (tune range based on warehouse environment)
+        # Normalize edge density conceptually (tune range based on warehouse environment)  # noqa: E501
         # Assuming density of 0.05 is highly obscured
         self.latest_cam_confidence = min(1.0, edge_density / 0.05)
 
@@ -134,7 +134,9 @@ class ObstacleDetector(Node):
 
         self.publish_markers(obstacles, scan.header.frame_id)
 
-    def publish_markers(self, obstacles: list, frame_id: str) -> None:
+    def publish_markers(
+        self, obstacles: List[Tuple[float, float, float]], frame_id: str
+    ) -> None:  # noqa: E501
         """Converts the list of obstacles to MarkerArray and publishes.
 
         Args:
@@ -145,7 +147,7 @@ class ObstacleDetector(Node):
 
         # Simplify by grouping close obstacles to avoid spamming markers
         if not obstacles:
-            # Publish empty array or just return. Returning is fine, but we might want to clear old markers
+            # Publish empty array or just return. Returning is fine, but we might want to clear old markers  # noqa: E501
             # Let's publish a delete-all marker
             del_marker = Marker()
             del_marker.action = Marker.DELETEALL
@@ -187,7 +189,7 @@ class ObstacleDetector(Node):
         self.marker_pub.publish(marker_array)
 
 
-def main(args: list | None = None) -> None:
+def main(args: Optional[List[str]] = None) -> None:
     """Main entry point for the node.
 
     Args:

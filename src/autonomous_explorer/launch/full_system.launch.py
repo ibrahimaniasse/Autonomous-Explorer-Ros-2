@@ -20,25 +20,23 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    pkg_autonomous_explorer = get_package_share_directory('autonomous_explorer')
+    pkg_autonomous_explorer = get_package_share_directory("autonomous_explorer")
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    use_sim_time = LaunchConfiguration("use_sim_time", default="true")
 
     # Paths
-    exploration_params_file = PathJoinSubstitution([
-        pkg_autonomous_explorer, 'config', 'exploration_params.yaml'
-    ])
+    exploration_params_file = PathJoinSubstitution(
+        [pkg_autonomous_explorer, "config", "exploration_params.yaml"]
+    )
 
     # ------------------------------------------------------------------
     # Phase 1 — Simulation (Gazebo + robot + bridge + rviz)
     # ------------------------------------------------------------------
     simulation = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(
-                pkg_autonomous_explorer, 'launch', 'simulation.launch.py'
-            )
+            os.path.join(pkg_autonomous_explorer, "launch", "simulation.launch.py")
         ),
-        launch_arguments={'use_sim_time': use_sim_time}.items(),
+        launch_arguments={"use_sim_time": use_sim_time}.items(),
     )
 
     # ------------------------------------------------------------------
@@ -46,43 +44,43 @@ def generate_launch_description():
     # ------------------------------------------------------------------
     navigation = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(
-                pkg_autonomous_explorer, 'launch', 'navigation.launch.py'
-            )
+            os.path.join(pkg_autonomous_explorer, "launch", "navigation.launch.py")
         ),
-        launch_arguments={'use_sim_time': use_sim_time}.items(),
+        launch_arguments={"use_sim_time": use_sim_time}.items(),
     )
 
     # ------------------------------------------------------------------
     # Phase 3 — Exploration
     # ------------------------------------------------------------------
     frontier_explorer = Node(
-        package='autonomous_explorer',
-        executable='frontier_explorer',
-        name='frontier_explorer',
-        output='screen',
+        package="autonomous_explorer",
+        executable="frontier_explorer",
+        name="frontier_explorer",
+        output="screen",
         parameters=[
-            {'use_sim_time': use_sim_time},
+            {"use_sim_time": use_sim_time},
             exploration_params_file,
         ],
     )
 
     waypoint_manager = Node(
-        package='autonomous_explorer',
-        executable='waypoint_manager',
-        name='waypoint_manager',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
+        package="autonomous_explorer",
+        executable="waypoint_manager",
+        name="waypoint_manager",
+        output="screen",
+        parameters=[{"use_sim_time": use_sim_time}],
     )
 
-    return LaunchDescription([
-        DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='true',
-            description='Use simulation (Gazebo) clock.',
-        ),
-        simulation,
-        navigation,
-        frontier_explorer,
-        waypoint_manager,
-    ])
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument(
+                "use_sim_time",
+                default_value="true",
+                description="Use simulation (Gazebo) clock.",
+            ),
+            simulation,
+            navigation,
+            frontier_explorer,
+            waypoint_manager,
+        ]
+    )
