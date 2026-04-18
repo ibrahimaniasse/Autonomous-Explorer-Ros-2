@@ -85,45 +85,29 @@ class FrontierExplorer(Node):
         self.declare_parameter("min_frontier_distance_m", 0.5)
         self.declare_parameter("recovery_spin_speed_rad_s", 1.0)
 
-        self._min_cluster_size: int = (
-            self.get_parameter("min_cluster_size_px").value
-        )
+        self._min_cluster_size: int = self.get_parameter("min_cluster_size_px").value
         self._map_update_period: float = (
             1.0 / self.get_parameter("map_update_rate_hz").value
         )
-        self._canny_low: int = (
-            self.get_parameter("canny_low_threshold").value
-        )
-        self._canny_high: int = (
-            self.get_parameter("canny_high_threshold").value
-        )
-        self._info_gain_weight: float = (
-            self.get_parameter("info_gain_weight").value
-        )
-        self._distance_weight: float = (
-            self.get_parameter("distance_weight").value
-        )
-        self._stuck_threshold: float = (
-            self.get_parameter("stuck_threshold_m").value
-        )
-        self._stuck_timeout: float = (
-            self.get_parameter("stuck_timeout_s").value
-        )
-        self._max_retries: int = (
-            self.get_parameter("max_retries_per_frontier").value
-        )
-        self._completion_threshold: float = (
-            self.get_parameter("completion_threshold").value
-        )
-        self._empty_iters_limit: int = (
-            self.get_parameter("empty_iterations_before_stop").value
-        )
-        self._min_frontier_distance_m: float = (
-            self.get_parameter("min_frontier_distance_m").value
-        )
-        self._recovery_spin_speed: float = (
-            self.get_parameter("recovery_spin_speed_rad_s").value
-        )
+        self._canny_low: int = self.get_parameter("canny_low_threshold").value
+        self._canny_high: int = self.get_parameter("canny_high_threshold").value
+        self._info_gain_weight: float = self.get_parameter("info_gain_weight").value
+        self._distance_weight: float = self.get_parameter("distance_weight").value
+        self._stuck_threshold: float = self.get_parameter("stuck_threshold_m").value
+        self._stuck_timeout: float = self.get_parameter("stuck_timeout_s").value
+        self._max_retries: int = self.get_parameter("max_retries_per_frontier").value
+        self._completion_threshold: float = self.get_parameter(
+            "completion_threshold"
+        ).value
+        self._empty_iters_limit: int = self.get_parameter(
+            "empty_iterations_before_stop"
+        ).value
+        self._min_frontier_distance_m: float = self.get_parameter(
+            "min_frontier_distance_m"
+        ).value
+        self._recovery_spin_speed: float = self.get_parameter(
+            "recovery_spin_speed_rad_s"
+        ).value
 
         # ------------------------------------------------------------------
         # Subscribers
@@ -147,26 +131,16 @@ class FrontierExplorer(Node):
         # ------------------------------------------------------------------
         # Action clients
         # ------------------------------------------------------------------
-        self._nav_client = ActionClient(
-            self, NavigateToPose, "navigate_to_pose"
-        )
+        self._nav_client = ActionClient(self, NavigateToPose, "navigate_to_pose")
         self._backup_client = ActionClient(self, BackUp, "backup")
 
         # ------------------------------------------------------------------
         # Publishers
         # ------------------------------------------------------------------
-        self._marker_pub = self.create_publisher(
-            MarkerArray, "/frontiers", 10
-        )
-        self._progress_pub = self.create_publisher(
-            Float32, "/exploration/progress", 10
-        )
-        self._status_pub = self.create_publisher(
-            String, "/exploration/status", 10
-        )
-        self._cmd_vel_pub = self.create_publisher(
-            Twist, "/cmd_vel", 10
-        )
+        self._marker_pub = self.create_publisher(MarkerArray, "/frontiers", 10)
+        self._progress_pub = self.create_publisher(Float32, "/exploration/progress", 10)
+        self._status_pub = self.create_publisher(String, "/exploration/status", 10)
+        self._cmd_vel_pub = self.create_publisher(Twist, "/cmd_vel", 10)
 
         # ------------------------------------------------------------------
         # Internal state
@@ -251,17 +225,13 @@ class FrontierExplorer(Node):
 
         # Cluster
         clusters = cluster_frontiers(frontier_img, self._min_cluster_size)
-        self.get_logger().debug(
-            f"Detected {len(clusters)} frontier clusters."
-        )
+        self.get_logger().debug(f"Detected {len(clusters)} frontier clusters.")
 
         # Publish markers for all clusters
         self._publish_frontier_markers(clusters, grid_msg)
 
         # Select best frontier
-        min_dist_px = int(
-            self._min_frontier_distance_m / grid_msg.info.resolution
-        )
+        min_dist_px = int(self._min_frontier_distance_m / grid_msg.info.resolution)
         best = select_best_frontier(
             clusters=clusters,
             robot_position_px=robot_px,
@@ -299,9 +269,7 @@ class FrontierExplorer(Node):
                     self._blacklist.clear()
                 else:
                     # No blacklist to clear — spin to reveal new frontiers
-                    self.get_logger().info(
-                        "Recovery: spinning to scan new area."
-                    )
+                    self.get_logger().info("Recovery: spinning to scan new area.")
                     self._run_spin()
 
                 self._empty_iterations = 0
@@ -309,8 +277,12 @@ class FrontierExplorer(Node):
 
         self._empty_iterations = 0
 
-        # If targeting a new frontier, reset retry counter
-        if best.centroid_px != self._current_target_px:
+        # If targeting a new frontier, reset retry counter (with 2px tolerance)
+        if (
+            self._current_target_px is None
+            or abs(best.centroid_px[0] - self._current_target_px[0]) > 2
+            or abs(best.centroid_px[1] - self._current_target_px[1]) > 2
+        ):
             self._current_target_px = best.centroid_px
             self._retry_count = 0
 
@@ -323,12 +295,8 @@ class FrontierExplorer(Node):
                     t = self._tf_buffer.lookup_transform(
                         "map", "base_footprint", rclpy.time.Time()
                     )
-                    dx_m = abs(
-                        t.transform.translation.x - self._last_goal_robot_x
-                    )
-                    dy_m = abs(
-                        t.transform.translation.y - self._last_goal_robot_y
-                    )
+                    dx_m = abs(t.transform.translation.x - self._last_goal_robot_x)
+                    dy_m = abs(t.transform.translation.y - self._last_goal_robot_y)
                     if math.hypot(dx_m, dy_m) < 0.1:
                         self.get_logger().warn(
                             "Stale frontier selection detected, "
@@ -350,8 +318,7 @@ class FrontierExplorer(Node):
             pass
 
         self.get_logger().info(
-            f"Navigating to frontier at px {best.centroid_px} "
-            f"(size={best.size})."
+            f"Navigating to frontier at px {best.centroid_px} " f"(size={best.size})."
         )
         self._send_nav_goal(best, grid_msg)
 
@@ -359,14 +326,10 @@ class FrontierExplorer(Node):
     # Navigation action
     # ------------------------------------------------------------------
 
-    def _send_nav_goal(
-        self, cluster: FrontierCluster, grid_msg: OccupancyGrid
-    ) -> None:
+    def _send_nav_goal(self, cluster: FrontierCluster, grid_msg: OccupancyGrid) -> None:
         """Send a NavigateToPose goal for the cluster centroid."""
         if not self._nav_client.wait_for_server(timeout_sec=5.0):
-            self.get_logger().error(
-                "NavigateToPose action server not available."
-            )
+            self.get_logger().error("NavigateToPose action server not available.")
             return
 
         origin = Pose2D(
@@ -394,8 +357,21 @@ class FrontierExplorer(Node):
         """Handle the response when the goal is accepted or rejected."""
         goal_handle = future.result()
         if not goal_handle.accepted:
-            self.get_logger().warn("Navigation goal was rejected.")
+            self._retry_count += 1
+            self.get_logger().warn(
+                f"Navigation goal was rejected (retry {self._retry_count}/{self._max_retries})."
+            )
             self._navigating = False
+            self._last_goal_centroid_px = None  # Allow immediate retry
+
+            if self._retry_count >= self._max_retries:
+                if self._current_target_px is not None:
+                    self.get_logger().warn(
+                        f"Blacklisting rejected frontier at {self._current_target_px}."
+                    )
+                    self._blacklist.add(self._current_target_px)
+                self._current_target_px = None
+                self._retry_count = 0
             return
 
         self._current_goal_handle = goal_handle
@@ -419,10 +395,12 @@ class FrontierExplorer(Node):
                 f"Navigation to frontier failed (status={status}, "
                 f"retry {self._retry_count}/{self._max_retries})."
             )
+            self._last_goal_centroid_px = None  # Allow immediate retry
+
             if self._retry_count >= self._max_retries:
                 if self._current_target_px is not None:
                     self.get_logger().warn(
-                        f"Blacklisting frontier at {self._current_target_px}."
+                        f"Blacklisting failed frontier at {self._current_target_px}."
                     )
                     self._blacklist.add(self._current_target_px)
                 self._current_target_px = None
@@ -531,9 +509,7 @@ class FrontierExplorer(Node):
     # TF helpers
     # ------------------------------------------------------------------
 
-    def _get_robot_pixel(
-        self, grid_msg: OccupancyGrid
-    ) -> Optional[tuple[int, int]]:
+    def _get_robot_pixel(self, grid_msg: OccupancyGrid) -> Optional[tuple[int, int]]:
         """Get the robot's current position as a pixel in the map grid."""
         try:
             t = self._tf_buffer.lookup_transform(
@@ -639,17 +615,20 @@ class FrontierExplorer(Node):
     def _publish_status(self, state: str, progress: float) -> None:
         """Publish a JSON status message."""
         msg = String()
-        msg.data = json.dumps({
-            "state": state,
-            "progress": round(progress, 4),
-            "blacklist_size": len(self._blacklist),
-        })
+        msg.data = json.dumps(
+            {
+                "state": state,
+                "progress": round(progress, 4),
+                "blacklist_size": len(self._blacklist),
+            }
+        )
         self._status_pub.publish(msg)
 
 
 # ----------------------------------------------------------------------
 # Entry point
 # ----------------------------------------------------------------------
+
 
 def main(args: list[str] | None = None) -> None:
     """Spin up the FrontierExplorer node."""

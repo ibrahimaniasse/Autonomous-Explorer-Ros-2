@@ -37,6 +37,7 @@ from numpy.typing import NDArray
 # Data structures
 # ---------------------------------------------------------------------------
 
+
 class Pose2D(NamedTuple):
     """Minimal 2-D pose used for grid ↔ world conversions.
 
@@ -74,6 +75,7 @@ class FrontierCluster:
 # ---------------------------------------------------------------------------
 # Coordinate transforms
 # ---------------------------------------------------------------------------
+
 
 def grid_to_world(
     px: tuple[int, int],
@@ -147,6 +149,7 @@ def world_to_grid(
 # Occupancy-grid image conversion
 # ---------------------------------------------------------------------------
 
+
 def occupancy_grid_to_image(
     grid: NDArray[np.int8],
     width: int,
@@ -189,6 +192,7 @@ def occupancy_grid_to_image(
 # ---------------------------------------------------------------------------
 # Frontier detection
 # ---------------------------------------------------------------------------
+
 
 def detect_frontier_cells(
     image: NDArray[np.uint8],
@@ -266,6 +270,7 @@ def detect_frontier_cells(
 # Clustering
 # ---------------------------------------------------------------------------
 
+
 def cluster_frontiers(
     frontier_image: NDArray[np.uint8],
     min_cluster_size: int,
@@ -314,11 +319,13 @@ def cluster_frontiers(
             int(stats[label, cv2.CC_STAT_HEIGHT]),
         )
 
-        clusters.append(FrontierCluster(
-            centroid_px=(cx, cy),
-            size=area,
-            bbox=bbox,
-        ))
+        clusters.append(
+            FrontierCluster(
+                centroid_px=(cx, cy),
+                size=area,
+                bbox=bbox,
+            )
+        )
 
     # Largest clusters first — a useful default for debugging
     clusters.sort(key=lambda c: c.size, reverse=True)
@@ -328,6 +335,7 @@ def cluster_frontiers(
 # ---------------------------------------------------------------------------
 # Frontier selection (cost–utility)
 # ---------------------------------------------------------------------------
+
 
 def select_best_frontier(
     clusters: list[FrontierCluster],
@@ -389,11 +397,13 @@ def select_best_frontier(
     # Filter out clusters too close to the robot (inside Nav2 goal tolerance)
     if min_frontier_distance_px > 0:
         candidates = [
-            c for c in candidates
+            c
+            for c in candidates
             if np.hypot(
                 c.centroid_px[0] - robot_position_px[0],
                 c.centroid_px[1] - robot_position_px[1],
-            ) >= min_frontier_distance_px
+            )
+            >= min_frontier_distance_px
         ]
 
     if not candidates:

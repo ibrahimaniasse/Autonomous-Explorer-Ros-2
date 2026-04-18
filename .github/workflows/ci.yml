@@ -1,0 +1,62 @@
+name: ROS 2 CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (Ubuntu 24.04 / Jazzy)
+    runs-on: ubuntu-24.04
+    container:
+      image: ros:jazzy-ros-base
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y python3-pip python3-pytest python3-flake8 python3-mypy
+          pip3 install black --break-system-packages
+
+      - name: Run Black code format check
+        run: |
+          black --check src/
+
+      - name: Run Flake8
+        run: |
+          flake8 --max-line-length=88 --extend-ignore=E203,W503 src/
+
+      - name: Run Mypy (type hinting)
+        run: |
+          # ignore missing imports for external libraries
+          mypy --ignore-missing-imports src/
+
+      - name: Build Workspace
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          # Install deps
+          rosdep update
+          rosdep install --from-paths src --ignore-src -y
+          colcon build
+
+      - name: Run Unit Tests
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          colcon test
+          colcon test-result --all
+
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker compose build

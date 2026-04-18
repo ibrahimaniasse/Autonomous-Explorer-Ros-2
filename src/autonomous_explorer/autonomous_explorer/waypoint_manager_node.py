@@ -52,14 +52,10 @@ class WaypointManager(Node):
         )
 
         # Action client
-        self._nav_client = ActionClient(
-            self, NavigateToPose, "navigate_to_pose"
-        )
+        self._nav_client = ActionClient(self, NavigateToPose, "navigate_to_pose")
 
         # Status publisher
-        self._status_pub = self.create_publisher(
-            String, "/waypoint_status", 10
-        )
+        self._status_pub = self.create_publisher(String, "/waypoint_status", 10)
 
         self.get_logger().info("WaypointManager initialised — waiting for /waypoints.")
 
@@ -99,9 +95,7 @@ class WaypointManager(Node):
             return
 
         if not self._nav_client.wait_for_server(timeout_sec=5.0):
-            self.get_logger().error(
-                "NavigateToPose action server not available."
-            )
+            self.get_logger().error("NavigateToPose action server not available.")
             return
 
         wp = self._waypoints[self._current_index]
@@ -139,9 +133,7 @@ class WaypointManager(Node):
         status = result.status
 
         if status == 4:  # SUCCEEDED
-            self.get_logger().info(
-                f"Waypoint {self._current_index + 1} reached."
-            )
+            self.get_logger().info(f"Waypoint {self._current_index + 1} reached.")
             self._retry_count = 0
             self._advance()
         else:
@@ -175,11 +167,13 @@ class WaypointManager(Node):
     def _publish_status(self, status: str) -> None:
         """Publish waypoint progress as a JSON string."""
         msg = String()
-        msg.data = json.dumps({
-            "current_index": self._current_index,
-            "total": len(self._waypoints),
-            "status": status,
-        })
+        msg.data = json.dumps(
+            {
+                "current_index": self._current_index,
+                "total": len(self._waypoints),
+                "status": status,
+            }
+        )
         self._status_pub.publish(msg)
         self.get_logger().debug(f"Status: {msg.data}")
 
@@ -187,6 +181,7 @@ class WaypointManager(Node):
 # ----------------------------------------------------------------------
 # Entry point
 # ----------------------------------------------------------------------
+
 
 def main(args: list[str] | None = None) -> None:
     """Spin up the WaypointManager node."""

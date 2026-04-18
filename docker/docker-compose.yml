@@ -14,7 +14,7 @@ services:
       - ROS_DOMAIN_ID=0
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-    command: ros2 launch autonomous_explorer simulation.launch.py
+    command: ros2 launch autonomous_explorer full_system.launch.py world:=${WORLD_FILE:-warehouse.sdf}
 
   explorer-dev:
     platform: linux/amd64
@@ -32,4 +32,4 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ../src:/ros2_ws/src
-    command: ros2 launch autonomous_explorer simulation.launch.py
+    command: ros2 launch autonomous_explorer full_system.launch.py world:=${WORLD_FILE:-warehouse.sdf}

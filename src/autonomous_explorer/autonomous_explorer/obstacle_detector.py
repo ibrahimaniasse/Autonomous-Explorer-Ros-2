@@ -24,40 +24,30 @@ class ObstacleDetector(Node):
 
     def __init__(self) -> None:
         """Initializes the ObstacleDetector node and its parameters."""
-        super().__init__('obstacle_detector')
+        super().__init__("obstacle_detector")
 
         # Declare parameters
-        self.declare_parameter('danger_zone', 0.5)
-        self.declare_parameter('w_lidar', 0.6)
-        self.declare_parameter('w_cam', 0.4)
-        self.declare_parameter('confidence_threshold', 0.5)
+        self.declare_parameter("danger_zone", 0.5)
+        self.declare_parameter("w_lidar", 0.6)
+        self.declare_parameter("w_cam", 0.4)
+        self.declare_parameter("confidence_threshold", 0.5)
 
         # Get parameters
-        self.danger_zone = self.get_parameter('danger_zone').value
-        self.w_lidar = self.get_parameter('w_lidar').value
-        self.w_cam = self.get_parameter('w_cam').value
-        self.conf_thresh = self.get_parameter('confidence_threshold').value
+        self.danger_zone = self.get_parameter("danger_zone").value
+        self.w_lidar = self.get_parameter("w_lidar").value
+        self.w_cam = self.get_parameter("w_cam").value
+        self.conf_thresh = self.get_parameter("confidence_threshold").value
 
         # Subscribers
         self.scan_sub = self.create_subscription(
-            LaserScan,
-            '/scan',
-            self.scan_callback,
-            10
+            LaserScan, "/scan", self.scan_callback, 10
         )
         self.img_sub = self.create_subscription(
-            Image,
-            '/camera/image_raw',
-            self.img_callback,
-            10
+            Image, "/camera/image_raw", self.img_callback, 10
         )
 
         # Publisher
-        self.marker_pub = self.create_publisher(
-            MarkerArray,
-            '/obstacles',
-            10
-        )
+        self.marker_pub = self.create_publisher(MarkerArray, "/obstacles", 10)
 
         # Tools
         self.bridge = CvBridge()
@@ -80,14 +70,14 @@ class ObstacleDetector(Node):
             msg: The image message received from the camera.
         """
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
         except Exception as e:
             self.get_logger().error(f"Failed to convert image: {e}")
             return
 
         # Focus on the lower half where close obstacles typically appear
         h, w = cv_image.shape[:2]
-        lower_half = cv_image[int(h / 2):, :]
+        lower_half = cv_image[int(h / 2) :, :]
 
         # Convert to grayscale and apply Gaussian blur
         gray = cv2.cvtColor(lower_half, cv2.COLOR_BGR2GRAY)
@@ -100,7 +90,7 @@ class ObstacleDetector(Node):
         edge_density = np.sum(edges > 0) / (edges.shape[0] * edges.shape[1])
 
         # Normalize edge density conceptually (tune range based on warehouse environment)
-        # Assuming density of 0.05 is highly obscured 
+        # Assuming density of 0.05 is highly obscured
         self.latest_cam_confidence = min(1.0, edge_density / 0.05)
 
     def scan_callback(self, msg: LaserScan) -> None:
@@ -170,7 +160,7 @@ class ObstacleDetector(Node):
         marker = Marker()
         marker.header.frame_id = frame_id
         marker.header.stamp = self.get_clock().now().to_msg()
-        marker.ns = 'obstacles'
+        marker.ns = "obstacles"
         marker.id = 0
         marker.type = Marker.SPHERE
         marker.action = Marker.ADD
@@ -213,5 +203,6 @@ def main(args: list | None = None) -> None:
         node.destroy_node()
         rclpy.try_shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

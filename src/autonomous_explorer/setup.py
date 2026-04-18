@@ -35,6 +35,7 @@ setup(
             'obstacle_detector = autonomous_explorer.obstacle_detector:main',
             'frontier_explorer = autonomous_explorer.frontier_explorer_node:main',
             'waypoint_manager = autonomous_explorer.waypoint_manager_node:main',
+            'tf_static_republisher = autonomous_explorer.tf_static_republisher:main',
         ],
     },
 )

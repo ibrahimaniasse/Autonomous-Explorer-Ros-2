@@ -204,7 +204,7 @@
         <ray>
           <scan>
             <horizontal>
-              <samples>360</samples>
+              <samples>1440</samples>
               <resolution>1</resolution>
               <min_angle>-3.14159</min_angle>
               <max_angle>3.14159</max_angle>
@@ -323,5 +323,21 @@
       name="gz::sim::systems::JointStatePublisher">
     </plugin>
 
+    <!-- Publishes link poses on gz topic /model/explorer_bot/pose -->
+    <plugin
+      filename="gz-sim-pose-publisher-system"
+      name="gz::sim::systems::PosePublisher">
+      <publish_link_pose>true</publish_link_pose>
+      <publish_sensor_pose>true</publish_sensor_pose>
+      <publish_collision_pose>false</publish_collision_pose>
+      <publish_visual_pose>false</publish_visual_pose>
+      <publish_nested_model_pose>false</publish_nested_model_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <static_publisher>true</static_publisher>
+      <static_update_frequency>1</static_update_frequency>
+    </plugin>
+
+
   </model>
 </sdf>
+

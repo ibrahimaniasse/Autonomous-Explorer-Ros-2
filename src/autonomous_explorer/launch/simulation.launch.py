@@ -81,20 +81,19 @@ def generate_launch_description():
         arguments=['0', '0', '0.1', '0', '0', '0', 'base_footprint', 'base_link']
     )
 
-    tf_lidar = Node(
+    tf_base_to_model = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
-        name='tf_lidar',
+        name='tf_base_to_model',
         output='screen',
-        arguments=['0', '0', '0.25', '0', '0', '0', 'base_footprint', 'explorer_bot/lidar_link/gpu_lidar']
+        arguments=['0', '0', '-0.1', '0', '0', '0', 'base_link', 'explorer_bot']
     )
 
-    tf_camera = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='tf_camera',
-        output='screen',
-        arguments=['0.2', '0', '0.15', '0', '0', '0', 'base_footprint', 'explorer_bot/camera_link/camera']
+    tf_static_relay = Node(
+        package='autonomous_explorer',
+        executable='tf_static_republisher',
+        name='tf_static_republisher',
+        output='screen'
     )
 
     return LaunchDescription([
@@ -111,7 +110,7 @@ def generate_launch_description():
         spawn_entity,
         bridge,
         tf_base_link,
-        tf_lidar,
-        tf_camera,
+        tf_base_to_model,
+        tf_static_relay,
         rviz
     ])

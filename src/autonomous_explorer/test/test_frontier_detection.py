@@ -27,6 +27,7 @@ from autonomous_explorer.frontier_detection import (
 # Helpers
 # -----------------------------------------------------------------------
 
+
 def _make_grid(*rows: list[int]) -> tuple[np.ndarray, int, int]:
     """Build a flat int8 grid from row lists.
 
@@ -42,16 +43,17 @@ def _make_grid(*rows: list[int]) -> tuple[np.ndarray, int, int]:
 # occupancy_grid_to_image
 # -----------------------------------------------------------------------
 
+
 class TestOccupancyGridToImage:
     """Test the three-level mapping on a synthetic 5×5 grid."""
 
     def test_three_level_mapping(self) -> None:
         grid, w, h = _make_grid(
-            [-1,   0, 100,   0, -1],
-            [ 0,   0,   0,   0,  0],
-            [100, 100,   0, -1, -1],
-            [-1,   0, 100,   0, -1],
-            [-1, -1,  -1,  -1, -1],
+            [-1, 0, 100, 0, -1],
+            [0, 0, 0, 0, 0],
+            [100, 100, 0, -1, -1],
+            [-1, 0, 100, 0, -1],
+            [-1, -1, -1, -1, -1],
         )
         image = occupancy_grid_to_image(grid, w, h)
 
@@ -77,6 +79,7 @@ class TestOccupancyGridToImage:
 # -----------------------------------------------------------------------
 # detect_frontier_cells
 # -----------------------------------------------------------------------
+
 
 class TestDetectFrontierCells:
     """Frontier detection on hand-crafted grids."""
@@ -140,6 +143,7 @@ class TestDetectFrontierCells:
 # cluster_frontiers
 # -----------------------------------------------------------------------
 
+
 class TestClusterFrontiers:
     """Clustering and noise filtering."""
 
@@ -148,9 +152,9 @@ class TestClusterFrontiers:
         # Create an image with one large blob and one tiny blob
         img = np.zeros((50, 50), dtype=np.uint8)
         # Large region (well above threshold)
-        img[10:20, 10:20] = 255   # 100 pixels
+        img[10:20, 10:20] = 255  # 100 pixels
         # Tiny region (below threshold)
-        img[40, 40] = 255          # 1 pixel
+        img[40, 40] = 255  # 1 pixel
 
         clusters = cluster_frontiers(img, min_cluster_size=5)
 
@@ -161,7 +165,7 @@ class TestClusterFrontiers:
     def test_multiple_clusters(self) -> None:
         """Two separated blobs should produce two clusters."""
         img = np.zeros((50, 50), dtype=np.uint8)
-        img[5:10, 5:10] = 255    # 25 px
+        img[5:10, 5:10] = 255  # 25 px
         img[30:35, 30:35] = 255  # 25 px
 
         clusters = cluster_frontiers(img, min_cluster_size=1)
@@ -177,6 +181,7 @@ class TestClusterFrontiers:
 # -----------------------------------------------------------------------
 # select_best_frontier
 # -----------------------------------------------------------------------
+
 
 class TestSelectBestFrontier:
     """Cost–utility ranking and blacklist filtering."""
@@ -220,9 +225,7 @@ class TestSelectBestFrontier:
         assert result is not None
         assert result.size == 20, "High distance_weight should pick the close cluster"
 
-    def test_respects_blacklist(
-        self, two_clusters: list[FrontierCluster]
-    ) -> None:
+    def test_respects_blacklist(self, two_clusters: list[FrontierCluster]) -> None:
         """A blacklisted cluster is never selected, even if it has the best utility."""
         # Blacklist the far-large cluster
         blacklist = {(90, 90)}
@@ -263,12 +266,8 @@ class TestSelectBestFrontier:
 
     def test_filters_too_close(self) -> None:
         """Frontiers inside min_frontier_distance_px are excluded."""
-        close = FrontierCluster(
-            centroid_px=(15, 15), size=50, bbox=(10, 10, 10, 10)
-        )
-        far = FrontierCluster(
-            centroid_px=(60, 60), size=50, bbox=(50, 50, 20, 20)
-        )
+        close = FrontierCluster(centroid_px=(15, 15), size=50, bbox=(10, 10, 10, 10))
+        far = FrontierCluster(centroid_px=(60, 60), size=50, bbox=(50, 50, 20, 20))
         result = select_best_frontier(
             clusters=[close, far],
             robot_position_px=(10, 10),
@@ -278,15 +277,14 @@ class TestSelectBestFrontier:
             min_frontier_distance_px=20,
         )
         assert result is not None
-        assert result.centroid_px == (60, 60), (
-            "Close cluster should be filtered by min_frontier_distance_px"
-        )
+        assert result.centroid_px == (
+            60,
+            60,
+        ), "Close cluster should be filtered by min_frontier_distance_px"
 
     def test_returns_none_when_all_too_close(self) -> None:
         """If every cluster is too close, return None (normal termination)."""
-        close = FrontierCluster(
-            centroid_px=(12, 12), size=50, bbox=(10, 10, 5, 5)
-        )
+        close = FrontierCluster(centroid_px=(12, 12), size=50, bbox=(10, 10, 5, 5))
         result = select_best_frontier(
             clusters=[close],
             robot_position_px=(10, 10),
@@ -301,6 +299,7 @@ class TestSelectBestFrontier:
 # -----------------------------------------------------------------------
 # Coordinate transforms
 # -----------------------------------------------------------------------
+
 
 class TestCoordinateTransforms:
     """Round-trip grid ↔ world conversions."""
