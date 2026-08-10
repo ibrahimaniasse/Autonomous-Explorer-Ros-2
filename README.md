@@ -11,13 +11,13 @@
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python" alt="Python">
   <img src="https://img.shields.io/badge/Simulation-Gazebo%20Harmonic-blue" alt="Gazebo Harmonic">
   <img src="https://img.shields.io/badge/Architecture-Docker-2496ED?logo=docker" alt="Docker">
-  <img src="https://github.com/Ibrahim0899/Autonomous-Explorer-Ros-2/actions/workflows/ci.yml/badge.svg" alt="CI Status">
+  <img src="https://github.com/ibrahimaniasse/Autonomous-Explorer-Ros-2/actions/workflows/ci.yml/badge.svg" alt="CI Status">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
 </p>
 
 ---
 
-<!-- GIF_PLACEHOLDER -->
+
 
 ## 📝 Overview
 
@@ -40,7 +40,7 @@ Utilizing Gazebo Harmonic for strict physics simulations alongside the industry-
 To reproduce the exact simulation without modifying your native Ubuntu dependencies, ensure you have [Docker and Docker Compose](https://docs.docker.com/engine/install/) installed.
 
 ```bash
-git clone https://github.com/Ibrahim0899/Autonomous-Explorer-Ros-2.git
+git clone https://github.com/ibrahimaniasse/Autonomous-Explorer-Ros-2.git
 cd Autonomous-Explorer-Ros-2
 
 # Launch the default Warehouse exploration

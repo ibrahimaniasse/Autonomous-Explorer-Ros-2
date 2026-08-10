@@ -18,8 +18,7 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Agent scratch files
-.gemini/
+# Temporary
 src/frames_*
 .venv/
 *.log
