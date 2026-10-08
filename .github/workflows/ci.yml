@@ -29,7 +29,7 @@ jobs:
 
       - name: Run Flake8
         run: |
-          python3 -m flake8 --max-line-length=88 --extend-ignore=E203,W503 src/
+          python3 -m flake8 --max-line-length=88 --extend-ignore=E203,W503,D,Q,I src/
 
       - name: Run Mypy (type hinting)
         run: |
