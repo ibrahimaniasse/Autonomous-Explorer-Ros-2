@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: ros:jazzy-ros-base
+    defaults:
+      run:
+        shell: bash
     
     steps:
       - name: Checkout repository
