@@ -25,16 +25,16 @@ jobs:
 
       - name: Run Black code format check
         run: |
-          black --check src/
+          python3 -m black --check src/
 
       - name: Run Flake8
         run: |
-          flake8 --max-line-length=88 --extend-ignore=E203,W503 src/
+          python3 -m flake8 --max-line-length=88 --extend-ignore=E203,W503 src/
 
       - name: Run Mypy (type hinting)
         run: |
           # Only check pure Python nodes, not launch files (which use untyped ROS C++ modules)
-          mypy --ignore-missing-imports \
+          python3 -m mypy --ignore-missing-imports \
             src/autonomous_explorer/autonomous_explorer/
 
       - name: Build Workspace
