@@ -20,8 +20,8 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
-          apt-get install -y python3-pip python3-pytest python3-flake8 python3-mypy
-          pip3 install black --break-system-packages
+          apt-get install -y python3-pip python3-pytest
+          pip3 install black flake8 mypy --break-system-packages
 
       - name: Run Black code format check
         run: |
